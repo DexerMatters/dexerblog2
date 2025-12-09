@@ -30,19 +30,7 @@ export default function Nav() {
   };
 
   const { data: docList, isLoading: isLoadingDocs } = useDocList(getGitHubPath(currentLocation));
-
-  const isPdf = viewingFile?.toLowerCase().endsWith(".pdf");
-  const githubPath = viewingFile ? getGitHubPath(viewingFile) : "";
-
-  const { data: fetchedContent, isLoading: isLoadingContent } = useDocContent(
-    !isPdf && viewingFile ? githubPath : ""
-  );
-
-  const fileContent = isPdf
-    ? `https://raw.githubusercontent.com/DexerMatters/dexerblog-docs/refs/heads/main/${githubPath}`
-    : fetchedContent;
-
-  const isLoadingFile = isPdf ? false : isLoadingContent;
+  const { data: fileContent, isLoading: isLoadingFile } = useDocContent(viewingFile ? getGitHubPath(viewingFile) : "");
 
   useEffect(() => {
     if (terminalRef.current) {
@@ -87,9 +75,9 @@ export default function Nav() {
   // Update list when currentLocation changes and docList is loaded
   useEffect(() => {
     if (docList && docList.length > 0) {
-      // Filter to show only directories, markdown and pdf files
+      // Filter to show only directories and markdown files
       const items = docList
-        .filter(item => item.type === "dir" || item.name.endsWith(".md") || item.name.endsWith(".pdf"))
+        .filter(item => item.type === "dir" || item.name.endsWith(".md"))
 
       setListItems(items);
     } else {
@@ -165,11 +153,7 @@ export default function Nav() {
                   style={{ scrollbarColor: 'white black', scrollbarWidth: 'thin' }}
                   className="bg-white text-black py-6 pl-12 pr-8 font-mono text-sm shadow-lg w-full max-w-3xl overflow-auto h-[80vh]"
                 >
-                  <Content
-                    isLoading={isLoadingFile}
-                    content={fileContent}
-                    type={isPdf ? "pdf" : "md"}
-                  />
+                  <Content isLoading={isLoadingFile} content={fileContent} />
                 </ContentTransition>
               ) : (
                 <List items={listItems} onItemClick={onItemClick as (item: any, rect: DOMRect) => void} />
